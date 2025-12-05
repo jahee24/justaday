@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:my_first_app/data/api/dio_client.dart';
-import 'package:my_first_app/data/models/ai_response.dart';
+import 'package:frontend/data/api/dio_client.dart';
+import 'package:frontend/data/models/ai_response.dart';
 
 class JournalService {
   JournalService._();

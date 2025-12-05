@@ -1,7 +1,7 @@
 //lib/data/api/dio_client.dart
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:my_first_app/data/api/interceptors/auth_interceptor.dart';
+import 'package:frontend/data/api/interceptors/auth_interceptor.dart';
 
 class DioClient {
   DioClient._internal() {

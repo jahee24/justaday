@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:my_first_app/core/navigation/navigation_service.dart';
-import 'package:my_first_app/state/auth_provider.dart';
-import 'package:my_first_app/state/journal_provider.dart';
-import 'package:my_first_app/ui/auth/login_signup_screen.dart';
-import 'package:my_first_app/ui/persona/persona_setting_screen.dart';
-import 'package:my_first_app/ui/journal/main_record_screen.dart';
-import 'package:my_first_app/ui/journal/feedback_screen.dart';
-import 'package:my_first_app/ui/journal/feedback_list_screen.dart';
-import 'package:my_first_app/ui/profile/name_setting_screen.dart';
+import 'package:frontend/core/navigation/navigation_service.dart';
+import 'package:frontend/state/auth_provider.dart';
+import 'package:frontend/state/journal_provider.dart';
+import 'package:frontend/ui/auth/login_signup_screen.dart';
+import 'package:frontend/ui/persona/persona_setting_screen.dart';
+import 'package:frontend/ui/journal/main_record_screen.dart';
+import 'package:frontend/ui/journal/feedback_screen.dart';
+import 'package:frontend/ui/journal/feedback_list_screen.dart';
+import 'package:frontend/ui/profile/name_setting_screen.dart';
 
 void main() {
   runApp(const MyApp());

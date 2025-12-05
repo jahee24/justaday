@@ -1,7 +1,7 @@
 //lib/data/api/interceptors/auth_interceptor.dart
 import 'package:dio/dio.dart';
-import 'package:my_first_app/core/navigation/navigation_service.dart';
-import 'package:my_first_app/data/auth/auth_service.dart';
+import 'package:frontend/core/navigation/navigation_service.dart';
+import 'package:frontend/data/auth/auth_service.dart';
 
 class AuthInterceptor extends Interceptor {
   AuthInterceptor({AuthService? authService})

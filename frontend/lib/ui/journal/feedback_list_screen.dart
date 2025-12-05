@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:my_first_app/data/api/dio_client.dart';
-import 'package:my_first_app/data/api/log_error_service.dart';
-import 'package:my_first_app/data/models/ai_response.dart';
-import 'package:my_first_app/ui/common/app_menu_button.dart';
+import 'package:frontend/data/api/dio_client.dart';
+import 'package:frontend/data/api/log_error_service.dart';
+import 'package:frontend/data/models/ai_response.dart';
+import 'package:frontend/ui/common/app_menu_button.dart';
 
 class FeedbackListScreen extends StatefulWidget {
   const FeedbackListScreen({super.key});

@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:my_first_app/core/navigation/navigation_service.dart';
-import 'package:my_first_app/data/api/dio_client.dart';
-import 'package:my_first_app/data/user/user_service.dart';
+import 'package:frontend/core/navigation/navigation_service.dart';
+import 'package:frontend/data/api/dio_client.dart';
+import 'package:frontend/data/user/user_service.dart';
 
 class NameSettingScreen extends StatefulWidget {
   const NameSettingScreen({super.key});

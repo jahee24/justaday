@@ -1,6 +1,6 @@
 //lib/data/api/log_error_service.dart
 import 'package:dio/dio.dart';
-import 'package:my_first_app/data/auth/auth_service.dart';
+import 'package:frontend/data/auth/auth_service.dart';
 
 class LogErrorService {
   LogErrorService._();

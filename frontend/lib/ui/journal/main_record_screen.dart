@@ -1,13 +1,13 @@
 //lib/ui/journal/main_record_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:my_first_app/core/navigation/navigation_service.dart';
-import 'package:my_first_app/data/api/journal_service.dart';
-import 'package:my_first_app/data/models/ai_response.dart';
-import 'package:my_first_app/data/models/journal_request.dart';
-import 'package:my_first_app/data/user/user_service.dart';
-import 'package:my_first_app/state/journal_provider.dart';
-import 'package:my_first_app/ui/common/app_menu_button.dart';
+import 'package:frontend/core/navigation/navigation_service.dart';
+import 'package:frontend/data/api/journal_service.dart';
+import 'package:frontend/data/models/ai_response.dart';
+import 'package:frontend/data/models/journal_request.dart';
+import 'package:frontend/data/user/user_service.dart';
+import 'package:frontend/state/journal_provider.dart';
+import 'package:frontend/ui/common/app_menu_button.dart';
 
 class MainRecordScreen extends StatefulWidget {
   const MainRecordScreen({super.key});
