@@ -1,5 +1,5 @@
 // src/main/java/io/github/jahee24/justaday/config/jwt/JwtTokenProvider.java
-package io.github.jahee24.justaday.config.jwt;
+package io.github.jahee24.justaday.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

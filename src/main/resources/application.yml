@@ -1,1 +1,42 @@
-spring.application.name=justaday
+spring:
+  application:
+    name: justaday
+  datasource:
+    url: ${SPRING_DATASOURCE_URL} #jdbc:postgresql://localhost:5432/mydaydb # DB URL ? DB?
+    username: ${SPRING_DATASOURCE_USERNAME} # PG ??? ??
+    password: ${SPRING_DATASOURCE_PASSWORD} # PG ????
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update # ?? ????? update ??, ?? ??? none ?? validate ??
+    show-sql: true # ?? ?? ??? (????)
+    properties:
+      hibernate:
+        format_sql: true # SQL ???
+  ai:
+    google:
+      api-key: ${GEMINI_API_KEY} #   Gemini API Key
+      chat:
+        model: gemini-2.5-flash
+jwt:
+  secret: ${SECRET_JWT_KEY}
+  expiration-time: 86400000
+
+logging:
+  level:
+    root: INFO      # ?? ??? INFO? ??
+    org.springframework.security: DEBUG # Spring Security ?? ??? DEBUG? ??
+    io.github.jahee24: DEBUG           # ???? ??(Custom Filter, Service) ??? DEBUG? ??
+server:
+  port: ${PORT:8080}
+  address: 0.0.0.0
+  netty:
+    connection-timeout: 45
+  tomcat:
+    connection-timeout: 45
+  jetty:
+    connection-idle-timeout: 600
+management:
+  metrics:
+    enable:
+      system: false

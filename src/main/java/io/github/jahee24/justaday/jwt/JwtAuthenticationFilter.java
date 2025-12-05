@@ -1,5 +1,5 @@
 //src/main/java/io/github/jahee24/justaday/config/jwt/JwtAuthenticationFilter.java
-package io.github.jahee24.justaday.config.jwt;
+package io.github.jahee24.justaday.jwt;
 
 import io.github.jahee24.justaday.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
@@ -31,6 +31,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         log.info("JWT Filter is executing.");
+        String requestURI = request.getRequestURI();
+        // ⚠️ SecurityConfig의 permitAll 경로와 일치시켜야 합니다.
+        // '/api/v1/auth/'와 '/api/v1/log/error/message' 경로는 토큰 검사를 우회합니다.
+        if (requestURI.startsWith("/api/v1/auth/") || requestURI.startsWith("/api/v1/log/error/message")) {
+            log.debug("Skip JWT filtering for public endpoint: {}", requestURI);
+            filterChain.doFilter(request, response);
+            return; // 이 경로는 토큰 검사를 건너뛰고 바로 다음 필터로 이동
+        }
         // 1. HTTP Header에서 Token 추출 ("Bearer [Token]")
         String token = resolveToken(request);
 

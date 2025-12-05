@@ -1,5 +1,5 @@
 // src/main/java/io/github/jahee24/justaday/config/security/CustomUserDetails.java
-package io.github.jahee24.justaday.config.security;
+package io.github.jahee24.justaday.security;
 
 
 import io.github.jahee24.justaday.entity.User;

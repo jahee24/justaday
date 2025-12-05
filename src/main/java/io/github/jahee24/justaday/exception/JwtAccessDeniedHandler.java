@@ -1,6 +1,6 @@
 //src/main/java/io/github/jahee24/justaday/config/exception/JwtAccessDeniedHandler.java
 //
-package io.github.jahee24.justaday.config.exception;
+package io.github.jahee24.justaday.exception;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
