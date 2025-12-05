@@ -6,9 +6,9 @@ FROM gradle:8.14-jdk17-ubi-minimal AS build
 WORKDIR /app
 
 # Gradle Wrapper 파일과 설정 파일을 복사합니다.
-COPY gradlew .
-COPY gradle/ /app/gradle/
-COPY build.gradle settings.gradle /app/
+COPY backend/gradlew .
+COPY backend/gradle/ /app/gradle/
+COPY backend/build.gradle settings.gradle /app/
 
 # 의존성 다운로드 및 빌드를 위해 소스 코드를 복사합니다.
 COPY src /app/src
