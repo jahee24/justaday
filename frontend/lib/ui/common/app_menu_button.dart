@@ -1,37 +1,34 @@
-// lib/ui/common/app_menu_button.dart
+// frontend/lib/ui/common/app_menu_button.dart
 import 'package:flutter/material.dart';
 import 'package:frontend/core/navigation/navigation_service.dart';
 import 'package:frontend/data/auth/auth_service.dart';
 import 'package:frontend/data/api/journal_service.dart';
 import 'package:frontend/data/models/ai_response.dart';
 import 'package:frontend/data/user/user_service.dart';
+import 'package:provider/provider.dart';
+import 'package:frontend/state/auth_provider.dart';
+import 'package:frontend/state/journal_provider.dart';
 
 class AppMenuButton extends StatelessWidget {
   const AppMenuButton({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // 메뉴 아이템을 동적으로 구성
+    final bool hasSubmittedToday = context.watch<JournalProvider>().hasSubmittedToday;
+
     return PopupMenuButton<String>(
       icon: const Icon(Icons.more_vert),
       onSelected: (String value) => _handleMenuSelection(context, value),
       itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-        const PopupMenuItem<String>(
-          value: 'journal_input',
+        // '저널 입력' 또는 '오늘의 피드백' 메뉴
+        PopupMenuItem<String>(
+          value: 'journal_main',
           child: Row(
             children: <Widget>[
-              Icon(Icons.edit, size: 20),
-              SizedBox(width: 8),
-              Text('저널 입력'),
-            ],
-          ),
-        ),
-        const PopupMenuItem<String>(
-          value: 'journal_view',
-          child: Row(
-            children: <Widget>[
-              Icon(Icons.list, size: 20),
-              SizedBox(width: 8),
-              Text('저널 보기'),
+              Icon(hasSubmittedToday ? Icons.visibility : Icons.edit, size: 20),
+              const SizedBox(width: 8),
+              Text(hasSubmittedToday ? '오늘의 피드백' : '저널 입력'),
             ],
           ),
         ),
@@ -81,15 +78,18 @@ class AppMenuButton extends StatelessWidget {
   }
 
   Future<void> _handleMenuSelection(BuildContext context, String value) async {
+    // 현재 화면이 /record가 아니면, 먼저 /record로 이동시킨다.
+    if (ModalRoute.of(context)?.settings.name != '/record') {
+      await NavigationService.navigateToRecord(replace: true);
+      // 잠시 기다려서 화면 전환이 완료되도록 함
+      await Future.delayed(const Duration(milliseconds: 50));
+    }
+
     switch (value) {
-      case 'journal_input':
-        await _handleJournalInput();
-        break;
-      case 'journal_view':
-        // TODO: 저널 보기 화면 구현 시 추가
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('저널 보기 기능은 준비 중입니다.')),
-        );
+      case 'journal_main':
+        // MainRecordScreen이 스스로 상태를 보고 UI를 그리므로, 아무것도 할 필요가 없음.
+        // 상태를 강제로 갱신하고 싶다면 아래 코드를 사용.
+        context.read<JournalProvider>().checkSubmissionStatus();
         break;
       case 'feedback_list':
         await NavigationService.navigateToFeedbackList();
@@ -106,22 +106,6 @@ class AppMenuButton extends StatelessWidget {
     }
   }
 
-  Future<void> _handleJournalInput() async {
-    AIResponse? todayFeedback =
-        await JournalService.instance.fetchTodayJournalFeedback();
-
-    if (todayFeedback != null) {
-      await UserService.instance.saveLastFeedback(todayFeedback);
-      await NavigationService.navigateToFeedback(
-        arguments: todayFeedback,
-        replace: true,
-      );
-      return;
-    }
-
-    await NavigationService.navigateToRecord(replace: true);
-  }
-
   Future<void> _handleLogout(BuildContext context) async {
     final bool? confirm = await showDialog<bool>(
       context: context,
@@ -129,23 +113,14 @@ class AppMenuButton extends StatelessWidget {
         title: const Text('로그아웃'),
         content: const Text('정말 로그아웃하시겠습니까?'),
         actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('취소'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('로그아웃'),
-          ),
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('취소')),
+          TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('로그아웃')),
         ],
       ),
     );
 
     if (confirm == true) {
-      await AuthService.instance.deleteToken();
-      await UserService.instance.clearUserData();
-      await NavigationService.navigateToLoginAndClear();
+      await Provider.of<AuthProvider>(context, listen: false).logout(context);
     }
   }
 }
-

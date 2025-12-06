@@ -1,4 +1,5 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
 import 'package:frontend/core/navigation/navigation_service.dart';
 import 'package:frontend/data/api/dio_client.dart';
@@ -7,6 +8,7 @@ import 'package:frontend/data/auth/auth_service.dart';
 import 'package:frontend/data/models/ai_response.dart';
 import 'package:frontend/data/models/login_response.dart';
 import 'package:frontend/data/user/user_service.dart';
+import 'package:frontend/state/journal_provider.dart';
 
 class AuthProvider extends ChangeNotifier {
   final Dio _dio = DioClient.dio;
@@ -14,9 +16,17 @@ class AuthProvider extends ChangeNotifier {
 
   bool _isLoading = false;
   String? _error;
+  String? _idcheckError;
 
   bool get isLoading => _isLoading;
   String? get error => _error;
+  String? get idcheckError => _idcheckError;
+
+  void clearError() {
+    _error = null;
+    _idcheckError = null;
+    notifyListeners();
+  }
 
   void _setLoading(bool value) {
     _isLoading = value;
@@ -28,24 +38,43 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<bool> checkIdAvailability(String userId) async {
+    if (userId.isEmpty) {
+      _idcheckError = null;
+      notifyListeners();
+      return false;
+    }
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/api/v1/auth/check-id',
+        queryParameters: {'userId': userId},
+      );
+      final bool isAvailable = response.data?['isAvailable'] ?? false;
+      if (isAvailable) {
+        _idcheckError = null;
+      } else {
+        _idcheckError = '이미 사용 중인 아이디입니다.';
+      }
+      notifyListeners();
+      return isAvailable;
+    } catch (e) {
+      _idcheckError = '아이디 확인 중 오류 발생';
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<void> login({required String userId, required String password}) async {
     _setError(null);
     _setLoading(true);
     try {
       final Response<dynamic> res = await _dio.post<dynamic>(
-        'https://divine-tenderness-production-9284.up.railway.app/api/v1/auth/login',
+        '/api/v1/auth/login',
         data: <String, dynamic>{'userId': userId, 'password': password},
       );
       
-      // 응답 데이터 확인
-      if (res.data == null) {
-        _setError('서버 응답이 없습니다.');
-        return;
-      }
-
-      // 응답이 Map인지 확인
-      if (res.data is! Map<String, dynamic>) {
-        _setError('서버 응답 형식이 올바르지 않습니다.');
+      if (res.data == null || res.data is! Map<String, dynamic>) {
+        _setError('서버 응답이 올바르지 않습니다.');
         return;
       }
 
@@ -53,8 +82,12 @@ class AuthProvider extends ChangeNotifier {
       await _authService.saveToken(parsed.token);
       
       await _routeAfterAuth();
-    } on DioException catch (_) {
-      _setError('일시적인 오류가 발생했습니다. 다시 시도해주세요.');
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        _setError('아이디 또는 비밀번호가 일치하지 않습니다.');
+      } else {
+        _setError('일시적인 오류가 발생했습니다. 다시 시도해주세요.');
+      }
     } catch (_) {
       _setError('일시적인 오류가 발생했습니다. 다시 시도해주세요.');
     } finally {
@@ -66,23 +99,22 @@ class AuthProvider extends ChangeNotifier {
     _setError(null);
     _setLoading(true);
     try {
+      // 회원가입 전 최종 아이디 유효성 검사
+      final isAvailable = await checkIdAvailability(userId);
+      if (!isAvailable) {
+        _setError(_idcheckError ?? '아이디를 사용할 수 없습니다.');
+        _setLoading(false);
+        return;
+      }
+
       final Response<dynamic> res = await _dio.post<dynamic>(
         'https://divine-tenderness-production-9284.up.railway.app/api/v1/auth/signup',
         data: <String, dynamic>{'userId': userId, 'password': password, 'aiPersonaId': 0},
       );
       
-      // 응답 데이터 확인
-      if (res.data == null) {
-        _setError('서버 응답이 없습니다.');
-        return;
-      }
-
-      // 회원가입 응답은 로그인 응답과 다를 수 있음
-      // 응답이 Map이고 token 필드가 있는 경우에만 처리
       if (res.data is Map<String, dynamic>) {
         final Map<String, dynamic> data = res.data as Map<String, dynamic>;
         
-        // 토큰이 있는 경우에만 저장
         if (data.containsKey('token') && data['token'] is String) {
           final String token = data['token'] as String;
           await _authService.saveToken(token);
@@ -95,13 +127,33 @@ class AuthProvider extends ChangeNotifier {
           ? e.response?.data['message'] as String?
           : null;
       _setError(errorMessage ?? e.message ?? '네트워크 오류가 발생했습니다.');
-      _setLoading(false);
     } catch (e) {
       _setError('회원가입 중 오류가 발생했습니다: ${e.toString()}');
+    } finally {
       _setLoading(false);
     }
   }
   
+  Future<void> logout(BuildContext context) async {
+    _setLoading(true);
+    try {
+      Provider.of<JournalProvider>(context, listen: false).resetState();
+      
+      await _authService.deleteToken();
+      await UserService.instance.clearUserData();
+
+      print('🔒 [LOGOUT] User logged out, all states cleared.');
+
+      await NavigationService.navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
+
+    } catch (e) {
+      print('🔴 [LOGOUT ERROR] Failed to logout: $e');
+      await NavigationService.navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   Future<void> _routeAfterAuth() async {
     try {
       final Response<dynamic> userRes = await _dio.get<dynamic>(
@@ -141,8 +193,7 @@ class AuthProvider extends ChangeNotifier {
       return;
     }
 
-    // 서버에서 오늘 작성한 저널 피드백 조회
-    AIResponse? todayFeedback =        await JournalService.instance.fetchTodayJournalFeedback();
+    AIResponse? todayFeedback = await JournalService.instance.fetchTodayJournalFeedback();
     if (todayFeedback != null) {
       await UserService.instance.saveLastFeedback(todayFeedback);
       await NavigationService.navigateToFeedback(
@@ -152,7 +203,6 @@ class AuthProvider extends ChangeNotifier {
       return;
     }
 
-    // 오늘 작성한 저널이 없으면 저널 입력 화면으로
     await NavigationService.navigateToRecord();
   }
 }

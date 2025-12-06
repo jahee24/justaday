@@ -4,6 +4,7 @@ import 'package:frontend/data/api/dio_client.dart';
 import 'package:frontend/data/api/log_error_service.dart';
 import 'package:frontend/data/models/ai_response.dart';
 import 'package:frontend/ui/common/app_menu_button.dart';
+import 'package:intl/intl.dart';
 
 class FeedbackListScreen extends StatefulWidget {
   const FeedbackListScreen({super.key});
@@ -57,13 +58,12 @@ class _FeedbackListScreenState extends State<FeedbackListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AI 피드백 기록'),
+        title: const Text('저널 및 피드백 기록'),
         actions: const <Widget>[AppMenuButton()],
       ),
       body: FutureBuilder<List<AIResponse>>(
         future: _future,
-        builder:
-            (BuildContext context, AsyncSnapshot<List<AIResponse>> snapshot) {
+        builder: (BuildContext context, AsyncSnapshot<List<AIResponse>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -72,7 +72,7 @@ class _FeedbackListScreenState extends State<FeedbackListScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  const Text('피드백을 불러올 수 없습니다.'),
+                  Text(snapshot.error.toString()),
                   const SizedBox(height: 8),
                   ElevatedButton(
                     onPressed: _refresh,
@@ -84,41 +84,61 @@ class _FeedbackListScreenState extends State<FeedbackListScreen> {
           }
           final List<AIResponse> data = snapshot.data ?? <AIResponse>[];
           if (data.isEmpty) {
-            return const Center(child: Text('표시할 피드백이 없습니다.'));
+            return const Center(child: Text('작성한 저널이 없습니다.'));
           }
+
           return RefreshIndicator(
             onRefresh: _refresh,
-            child: ListView.separated(
-              padding: const EdgeInsets.all(16),
+            child: ListView.builder(
+              padding: const EdgeInsets.all(8.0),
               itemCount: data.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (BuildContext context, int index) {
                 final AIResponse item = data[index];
+                
+                final DateTime? journalDate = item.journalDate;
+                final String title = journalDate != null
+                    ? DateFormat('yyyy년 MM월 dd일').format(journalDate)
+                    : '날짜 정보 없음';
+
                 return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          item.mentText.isEmpty
-                              ? '멘트가 없습니다.'
-                              : item.mentText,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 12),
-                        if (item.miniPlans.isEmpty)
-                          const Text('- 미니 플랜 없음 -')
-                        else
-                          ...item.miniPlans.asMap().entries.map(
-                                (MapEntry<int, String> e) => Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 2),
-                                  child: Text('${e.key + 1}. ${e.value}'),
-                                ),
-                              ),
-                      ],
+                  margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
+                  child: ExpansionTile(
+                    title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text(
+                      item.content ?? '저널 내용이 없습니다.',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            _buildSectionTitle('내가 쓴 저널'),
+                            Text(item.content ?? '저널 내용이 없습니다.'),
+                            const SizedBox(height: 24),
+                            
+                            _buildSectionTitle('AI의 피드백'),
+                            Text(
+                              item.mentText.isEmpty ? '피드백이 아직 준비되지 않았습니다.' : item.mentText,
+                              style: const TextStyle(fontStyle: FontStyle.italic),
+                            ),
+                            const SizedBox(height: 16),
+
+                            if (item.miniPlans.isNotEmpty) ...[
+                              _buildSectionTitle('미니 플랜'),
+                              ...item.miniPlans.map((plan) => ListTile(
+                                leading: const Icon(Icons.check_circle_outline, size: 20, color: Colors.green),
+                                title: Text(plan),
+                                dense: true,
+                                contentPadding: EdgeInsets.zero,
+                              )),
+                            ]
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 );
               },
@@ -128,6 +148,14 @@ class _FeedbackListScreenState extends State<FeedbackListScreen> {
       ),
     );
   }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Text(
+        title,
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.deepPurple),
+      ),
+    );
+  }
 }
-
-

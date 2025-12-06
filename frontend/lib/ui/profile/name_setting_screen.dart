@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/navigation/navigation_service.dart';
 import 'package:frontend/data/api/dio_client.dart';
 import 'package:frontend/data/user/user_service.dart';
+import 'package:frontend/ui/common/app_menu_button.dart';
 
 class NameSettingScreen extends StatefulWidget {
   const NameSettingScreen({super.key});
@@ -53,7 +54,7 @@ class _NameSettingScreenState extends State<NameSettingScreen> {
     final Dio dio = DioClient.dio;
     try {
       await dio.post<dynamic>(
-        'https://divine-tenderness-production-9284.up.railway.app/api/v1/user/name',
+        '/api/v1/user/name',
         data: <String, dynamic>{'name': name},
       );
       await UserService.instance.saveUserName(name);
@@ -82,6 +83,7 @@ class _NameSettingScreenState extends State<NameSettingScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('이름 설정'),
+        actions: const [AppMenuButton()],
       ),
       body: Center(
         child: ConstrainedBox(

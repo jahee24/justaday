@@ -11,7 +11,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class JournalResponseDto {
+public class JournalWithFeedbackResponseDTO {
     private Long id;
     private String content; // 저널 원문 (통합된 내용)
     private LocalDate journalDate;
@@ -21,8 +21,8 @@ public class JournalResponseDto {
     private int responseCode;       // 상태 코드 (성공 0)
 
     // Entity와 JSON String을 DTO로 변환하는 정적 메서드
-    public static JournalResponseDto fromEntities(JournalLog log, AIFeedback feedback, List<String> miniPlans) {
-        return JournalResponseDto.builder()
+    public static JournalWithFeedbackResponseDTO fromEntities(JournalLog log, AIFeedback feedback, List<String> miniPlans) {
+        return JournalWithFeedbackResponseDTO.builder()
                 .id(log.getId())
                 .content(log.getContent())
                 .journalDate(log.getJournalDate())

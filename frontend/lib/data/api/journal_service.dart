@@ -16,12 +16,29 @@ class JournalService {
       );
 
       if (res.statusCode == 200 && res.data is Map<String, dynamic>) {
+        print('✅ [JOURNAL SERVICE] Feedback ready (200)');
         return AIResponse.fromJson(res.data as Map<String, dynamic>);
       }
-
+      if (res.statusCode == 202) {
+        print('⏳ [JOURNAL SERVICE] Feedback pending (202)');
+        return null;
+      }
       if (res.statusCode == 204) {
         return null;
       }
+      if (res.statusCode == 404) {
+        return null;
+      }
+
+    } on DioException catch (e) {
+      // 202, 404는 정상 상황이므로 null 반환
+      if (e.response?.statusCode == 202 || e.response?.statusCode == 404) {
+        return null;
+      }
+
+      print('⚠️ [JOURNAL SERVICE ERROR] ${e.response?.statusCode}: ${e.message}');
+      // 다른 에러는 상위로 전파
+      rethrow;
     } catch (_) {
       // ignore: 네트워크/서버 오류 시 null 반환
     }

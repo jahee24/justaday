@@ -8,7 +8,7 @@ import io.github.jahee24.justaday.constant.AIPersona;
 import io.github.jahee24.justaday.dto.GeminiResponse;
 import io.github.jahee24.justaday.dto.JournalRequest;
 import io.github.jahee24.justaday.dto.JournalResponse;
-import io.github.jahee24.justaday.dto.JournalResponseDto;
+import io.github.jahee24.justaday.dto.JournalWithFeedbackResponseDTO;
 import io.github.jahee24.justaday.entity.AIFeedback;
 import io.github.jahee24.justaday.entity.JournalLog;
 import io.github.jahee24.justaday.entity.User;
@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -59,7 +58,7 @@ public class AILogServiceImpl implements AILogService {
         JournalLog logj = new JournalLog();
         logj.setUser(user);
 
-        String unifiedContent = String.format("상태 레벨: %d\n행동: %s\n감정: %s\n상황(Context): %s",
+        String unifiedContent = String.format("상태 레벨: %d\n행동: %s\n감정: %s\n상황: %s",
                 request.getStatus(),
                 request.getJournalAction(),
                 request.getJournalEmotion(),
@@ -92,27 +91,43 @@ public class AILogServiceImpl implements AILogService {
 
     // 최근 저널 로그 1개 조회 로직 (log/latest)
     @Transactional
-    public Optional<JournalResponseDto> findLatestJournalLog(String userId) {
+    public JournalWithFeedbackResponseDTO findLatestJournalLog(String userId) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + userId));
+        LocalDate today = LocalDate.now();
 
-        // 1. 오늘 작성된 로그를 찾습니다. (가장 최신 로그가 아리나 오늘 로그만 확인)
+        // 오늘 작성된 로그 (가장 최신 로그가 아리나 오늘 로그만 확인)
         Optional<JournalLog> todayLogOptional = journalLogRepository.findByUserIdAndJournalDate(user.getId(), LocalDate.now());
 
         if (todayLogOptional.isEmpty()) {
             // 오늘 로그가 없으면 (저널 미작성 상태) -> Optional.empty() 반환
-            return Optional.empty();
+            return null;
         }
 
-        // 2. 피드백 누락 여부 확인 및 생성 후 DTO 반환
+        //  피드백 누락 여부 확인 및 생성 후 DTO 반환
         JournalLog todayLog = todayLogOptional.get();
-        return Optional.of(ensureFeedbackAndConvertToDto(todayLog, user));
+        AIFeedback feedback = todayLog.getAiFeedback();
+        if (feedback == null) {
+            log.debug("⏳ [FEEDBACK PENDING] Log ID: {} - AI feedback not ready yet", todayLog.getId());
+            // 피드백이 아직 준비되지 않았음을 나타내는 응답 반환
+            return JournalWithFeedbackResponseDTO.builder()
+                    .id(todayLog.getId())
+                    .content(todayLog.getContent())
+                    .journalDate(todayLog.getJournalDate())
+                    .mentText("") // 빈 리스트
+                    .miniPlans(List.of())
+                    .responseCode(102) // 102 Processing
+                    .build();
+        }
+        log.debug("✅ [FEEDBACK READY] Log ID: {}, AIFeedback miniPlans: {}", todayLog.getId(), feedback.getMentText());
+//        return Optional.of(ensureFeedbackAndConvertToDto(todayLog, user));
+        return JournalWithFeedbackResponseDTO.fromEntities(todayLog, feedback, convertMiniPlansJsonToList(feedback.getMiniPlansJson()));
     }
 
 
     // 전체 저널 로그 목록 조회 로직 (log/getall)
     @Transactional
-    public List<JournalResponseDto> findAllJournalLogs(String userId) {
+    public List<JournalWithFeedbackResponseDTO> findAllJournalLogs(String userId) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + userId));
 
@@ -122,13 +137,14 @@ public class AILogServiceImpl implements AILogService {
         return allLogs.stream()
                 // 분리된 ensureFeedbackAndConvertToDto 로직을 모든 로그에 적용
                 .map(log -> {
+
                     // 피드백이 없는 로그도 이 메서드를 통해 재생성됩니다.
                     try {
                         return ensureFeedbackAndConvertToDto(log, user);
                     } catch (Exception e) {
                         System.err.println("Error processing log ID " + log.getId() + ": " + e.getMessage());
                         // 오류 발생 시 오류 메시지를 포함한 DTO 반환 (클라이언트에게 실패 알림)
-                        return JournalResponseDto.builder()
+                        return JournalWithFeedbackResponseDTO.builder()
                                 .id(log.getId())
                                 .content(log.getContent())
                                 .journalDate(log.getJournalDate())
@@ -152,44 +168,56 @@ public class AILogServiceImpl implements AILogService {
         if (!recentLogs.isEmpty()) {
             recentLogContent.append("\n\n**[최근 3일간의 사용자 기록 (단기 기억)]**\n");
             for (JournalLog log : recentLogs) {
-                recentLogContent.append(String.format("날짜 %s: %s\n", log.getJournalDate(), log.getContent()));
+                recentLogContent.append(String.format("- 날짜 %s: %s\n", log.getJournalDate(), log.getContent()));
             }
-            recentLogContent.append("----------------------------\n");
         }
         //
         String summaryContent = habitSummary != null ? habitSummary : "아직 장기 기억 요약 정보가 없습니다. (최초 작성 중)";
-
+        String actionPlanGuide = switch (persona) {
+            case MIR -> "심리적 안정과 소소한 행복을 느낄 수 있는 따뜻하고 쉬운 행동 3가지";
+            case HARRY -> "비효율을 줄이고 성과를 낼 수 있는 구체적이고 논리적인 행동 3가지";
+            case ODEN -> "내면의 평화를 찾거나 독서, 사색, 산책 등 꾸준함을 유지하는 행동 3가지";
+        };
         return String.format(
                 """
-                        당신은 AI 페르소나 ID %d (%s)의 역할을 수행합니다.
-                                    **[당신의 역할]** %s
-                        
-                                    **[사용자의 장기 기억 요약]**
-                                    %s
-                        
-                                    %s
-                        
-                                    사용자가 작성한 저널을 분석하여, 다음 JSON 형식에 맞춰 응답하세요.
-                                    응답 JSON 형식: {"mentText": "주요 멘트", "miniPlans": ["계획1", "계획2", "계획3"]}
-                        
-                                    요청 조건:
-                                    1. mentText: 사용자(%s)에게 **당신의 역할과 장기/단기 기억을 모두 반영**하여 피드백 본문을 작성하세요.
-                                        **[길이 제약: 100자 이상 150자 이하의 친근하고 명확한 문장으로 작성]**
-                                    2. miniPlans: 저널 내용 기반으로 실천할 수 있는 3가지 간단한 행동 계획을 제시하세요.
-                                    3. 응답은 오직 JSON 객체(```json ... ``` 없이)여야 합니다.
-                        
-                                    **[오늘의 저널]**
-                                    ---
-                                    %s
-                                    ---
-                        """,
-                persona.getId(),
+                            당신은 아래 설정된 페르소나로서 사용자의 일기를 분석하고 피드백을 주어야 합니다.
+                            
+                            **[페르소나 설정]**
+                            이름: %s
+                            %s
+                            
+                            **[사용자 정보]**
+                            이름: %s
+                            장기 기억 요약: %s
+                            %s
+                            
+                            **[오늘의 저널]**
+                            "%s"
+                            
+                            ---
+                            **[응답 요청사항]**
+                            위 정보를 바탕으로 JSON 형식으로만 응답하세요. (Markdown 코드블럭 사용 금지)
+                            
+                            1. "mentText":
+                               - 페르소나의 말투와 성격을 완벽히 반영하여 작성하세요.
+                               - 사용자(%s)를 전폭적으로 지지해야 합니다.
+                               - 길이는 공백 포함 100자~150자 사이로 작성하세요.
+                            2. "miniPlans":
+                               - 오늘 저널 내용을 바탕으로 즉시 실천 가능한 3가지 계획을 배열로 작성하세요.
+                               - **계획의 성격**: %s
+                            
+                            **[JSON 형식 예시]**
+                            {"mentText": "...", "miniPlans": ["...", "...", "..."]}
+                            """,
                 persona.getName(),
                 persona.getRoleDescription(),
-                summaryContent, // ★ 장기 기억 주입
-                recentLogContent.toString(), // ★ 단기 기억 주입
                 userName,
-                journalContent);
+                summaryContent,
+                recentLogContent.toString(),
+                journalContent,
+                userName,
+                actionPlanGuide // 페르소나별 맞춤 계획 가이드 주입
+        );
     }
 
 
@@ -211,13 +239,13 @@ public class AILogServiceImpl implements AILogService {
      * @param user       해당 저널의 사용자
      * @return 피드백이 포함된 JournalResponseDto
      */
-    private JournalResponseDto ensureFeedbackAndConvertToDto(JournalLog journalLog, User user) {
+    private JournalWithFeedbackResponseDTO ensureFeedbackAndConvertToDto(JournalLog journalLog, User user) {
         AIFeedback feedback = journalLog.getAiFeedback();
 
         if (feedback != null) {
             // 이미 피드백이 있는 경우 (정상 경로)
             List<String> miniPlans = convertMiniPlansJsonToList(feedback.getMiniPlansJson());
-            return JournalResponseDto.fromEntities(journalLog, feedback, miniPlans);
+            return JournalWithFeedbackResponseDTO.fromEntities(journalLog, feedback, miniPlans);
         }
         // 피드백 누락 시: AI 피드백 생성 로직 수행
         System.out.println(" Warning: AIFeedback missing for Log ID " + journalLog.getId() + ". Regenerating feedback...");
@@ -248,7 +276,7 @@ public class AILogServiceImpl implements AILogService {
             newFeedback.setMiniPlansJson(objectMapper.writeValueAsString(parsedResponse.getMiniPlans()));
             aiFeedbackRepository.save(newFeedback);
 
-            return JournalResponseDto.fromEntities(journalLog, newFeedback, parsedResponse.getMiniPlans());
+            return JournalWithFeedbackResponseDTO.fromEntities(journalLog, newFeedback, parsedResponse.getMiniPlans());
 
         } catch (JsonProcessingException e) {
             throw new RuntimeException("AI 응답 JSON 처리 중 오류 발생.", e);

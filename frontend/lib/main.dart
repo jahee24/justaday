@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
           '/persona': (_) => const PersonaSettingScreen(),
           '/name': (_) => const NameSettingScreen(),
           '/record': (_) => const MainRecordScreen(),
-          '/feedback': (_) => const FeedbackScreen(),
+          '/feedback': (_) => const MainRecordScreen(),
           '/feedback-list': (_) => const FeedbackListScreen(),
         },
       ),

@@ -8,10 +8,10 @@ WORKDIR /app
 # Gradle Wrapper 파일과 설정 파일을 복사합니다.
 COPY backend/gradlew .
 COPY backend/gradle/ /app/gradle/
-COPY backend/build.gradle settings.gradle /app/
+COPY backend/build.gradle backend/settings.gradle /app/
 
 # 의존성 다운로드 및 빌드를 위해 소스 코드를 복사합니다.
-COPY src /app/src
+COPY backend/src /app/src
 
 # 실행 가능한 JAR 파일을 빌드합니다. (build/libs/justaday-0.0.1-SNAPSHOT.jar 생성)
 RUN ./gradlew clean build -x test
