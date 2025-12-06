@@ -43,7 +43,7 @@ class _PersonaSettingScreenState extends State<PersonaSettingScreen> {
     try {
       await DioClient.dio.post(
         '/api/v1/user/persona',
-        data: {'aiPersonaId': _selectedPersonaId},
+        data: {'personaId': _selectedPersonaId},
       );
       await UserService.instance.savePersonaId(_selectedPersonaId!);
       final bool hasName = await UserService.instance.hasUserName();

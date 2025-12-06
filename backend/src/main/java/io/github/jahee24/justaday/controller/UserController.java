@@ -1,4 +1,4 @@
-// src/main/java/io/github/jahee24/justaday/controller/UserController.java
+//backend/src/main/java/io/github/jahee24/justaday/controller/UserController.java
 package io.github.jahee24.justaday.controller;
 
 import io.github.jahee24.justaday.dto.PersonaUpdateRequest;
