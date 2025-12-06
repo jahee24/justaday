@@ -14,7 +14,6 @@ class AppMenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 메뉴 아이템을 동적으로 구성
     final bool hasSubmittedToday = context.watch<JournalProvider>().hasSubmittedToday;
 
     return PopupMenuButton<String>(
@@ -78,17 +77,13 @@ class AppMenuButton extends StatelessWidget {
   }
 
   Future<void> _handleMenuSelection(BuildContext context, String value) async {
-    // 현재 화면이 /record가 아니면, 먼저 /record로 이동시킨다.
-    if (ModalRoute.of(context)?.settings.name != '/record') {
-      await NavigationService.navigateToRecord(replace: true);
-      // 잠시 기다려서 화면 전환이 완료되도록 함
-      await Future.delayed(const Duration(milliseconds: 50));
-    }
-
     switch (value) {
       case 'journal_main':
-        // MainRecordScreen이 스스로 상태를 보고 UI를 그리므로, 아무것도 할 필요가 없음.
-        // 상태를 강제로 갱신하고 싶다면 아래 코드를 사용.
+        // 현재 화면이 메인 화면이 아닐 경우에만 이동
+        if (ModalRoute.of(context)?.settings.name != '/record') {
+          await NavigationService.navigateToRecord(replace: true);
+        }
+        // 메인 화면에 있다면, 상태만 갱신하여 UI를 다시 그리도록 함
         context.read<JournalProvider>().checkSubmissionStatus();
         break;
       case 'feedback_list':
