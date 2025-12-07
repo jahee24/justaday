@@ -19,9 +19,7 @@ class AuthProvider extends ChangeNotifier {
   String? _idcheckError;
 
   bool get isLoading => _isLoading;
-
   String? get error => _error;
-
   String? get idcheckError => _idcheckError;
 
   void clearError() {
@@ -134,24 +132,17 @@ class AuthProvider extends ChangeNotifier {
       _setLoading(false);
     }
   }
-
-  Future<void> logout(BuildContext context) async {
+  
+  // BuildContext 인자 제거
+  Future<void> logout() async {
     _setLoading(true);
     try {
-      await NavigationService.navigateToLoginAndClear();
-      Provider.of<JournalProvider>(context, listen: false).resetState();
-
+      // JournalProvider 상태 초기화는 이제 AppMenuButton에서 담당
       await _authService.deleteToken();
       await UserService.instance.clearUserData();
-
-      print('🔒 [LOGOUT] User logged out, all states cleared.');
-
-      await NavigationService.navigatorKey.currentState
-          ?.pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
+      print('🔒 [LOGOUT] User data and token cleared.');
     } catch (e) {
-      print('🔴 [LOGOUT ERROR] Failed to logout: $e');
-      await NavigationService.navigatorKey.currentState
-          ?.pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
+      print('🔴 [LOGOUT ERROR] Failed to clear data: $e');
     } finally {
       _setLoading(false);
     }

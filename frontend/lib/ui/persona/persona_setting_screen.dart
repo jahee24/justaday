@@ -29,13 +29,15 @@ class _PersonaSettingScreenState extends State<PersonaSettingScreen> {
   Future<void> _loadInitialData() async {
     _personasFuture = PersonaService.instance.fetchPersonas();
     final currentPersonaId = await UserService.instance.getPersonaId();
-    setState(() {
-      _selectedPersonaId = currentPersonaId;
-    });
+    if (mounted) {
+      setState(() {
+        _selectedPersonaId = currentPersonaId;
+      });
+    }
   }
 
   Future<void> _updatePersona() async {
-    if (_selectedPersonaId == null) {
+    if (_selectedPersonaId == null || _selectedPersonaId == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('페르소나를 선택해주세요.')),
       );
@@ -97,12 +99,13 @@ class _PersonaSettingScreenState extends State<PersonaSettingScreen> {
           }
 
           final personas = snapshot.data!;
-          final selectedPersona = _selectedPersonaId == null
-              ? null
-              : personas.firstWhere(
-                  (p) => p.id == _selectedPersonaId,
-                  orElse: () => personas.first,
-                );
+          
+          final validPersonaIds = personas.map((p) => p.id).toSet();
+          final bool isCurrentIdValid = _selectedPersonaId != null && validPersonaIds.contains(_selectedPersonaId);
+          final int? dropdownValue = isCurrentIdValid ? _selectedPersonaId : null;
+          final Persona? selectedPersona = isCurrentIdValid
+              ? personas.firstWhere((p) => p.id == _selectedPersonaId)
+              : null;
 
           return Padding(
             padding: const EdgeInsets.all(16.0),
@@ -112,7 +115,7 @@ class _PersonaSettingScreenState extends State<PersonaSettingScreen> {
                 const Text('당신과 함께할 AI 코치를 선택해주세요.', style: TextStyle(fontSize: 18)),
                 const SizedBox(height: 20),
                 DropdownButtonFormField<int>(
-                  value: _selectedPersonaId,
+                  value: dropdownValue,
                   hint: const Text('페르소나 선택...'),
                   items: personas.map((persona) {
                     return DropdownMenuItem<int>(

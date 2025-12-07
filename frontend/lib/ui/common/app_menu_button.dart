@@ -98,6 +98,9 @@ class AppMenuButton extends StatelessWidget {
   }
 
   Future<void> _handleLogout(BuildContext context) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final journalProvider = Provider.of<JournalProvider>(context, listen: false);
+
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
@@ -111,12 +114,14 @@ class AppMenuButton extends StatelessWidget {
     );
 
     if (confirm == true) {
-      // 1. 먼저 화면을 전환
+      // 1. 다른 Provider들의 상태를 먼저 초기화
+      journalProvider.resetState();
+      
+      // 2. AuthProvider의 로그아웃 로직(데이터 삭제) 호출
+      await authProvider.logout();
+
+      // 3. 모든 작업이 끝난 후, 화면을 안전하게 전환
       await NavigationService.navigateToLoginAndClear();
-      // 2. 잠시 딜레이 - 화면 전환이 완료될 시간을 확보
-      await Future.delayed(const Duration(milliseconds: 50));
-      // 3. 그 다음에 상태 초기화 및 로그아웃 로직을 호출
-      Provider.of<AuthProvider>(context, listen: false).logout(context);
     }
   }
 }

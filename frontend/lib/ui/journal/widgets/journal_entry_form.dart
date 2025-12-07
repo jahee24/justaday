@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:frontend/state/journal_provider.dart';
 import 'package:frontend/data/models/journal_request.dart';
 import 'package:frontend/data/user/user_service.dart';
-import 'dart:math';
 
 class JournalEntryForm extends StatefulWidget {
   const JournalEntryForm({super.key});
@@ -14,11 +13,11 @@ class JournalEntryForm extends StatefulWidget {
 
 class _JournalEntryFormState extends State<JournalEntryForm> {
   final _formKey = GlobalKey<FormState>();
-  final _statusController = TextEditingController();
   final _actionController = TextEditingController();
   final _emotionController = TextEditingController();
   final _contextController = TextEditingController();
 
+  double _statusLevel = 3.0;
   String _greeting = '';
 
   @override
@@ -30,23 +29,24 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
   Future<void> _setGreeting() async {
     final personaId = await UserService.instance.getPersonaId();
     final userName = await UserService.instance.getUserName() ?? '사용자';
-    setState(() {
-      _greeting = _getGreetingMessage(personaId, userName);
-    });
+    if (mounted) {
+      setState(() {
+        _greeting = _getGreetingMessage(personaId, userName);
+      });
+    }
   }
 
   String _getGreetingMessage(int? personaId, String userName) {
     final greetings = {
-      1: "미르에게 $userName님의 하루를 알려주세요.", // 미르
-      2: "오늘의 데이터를 입력하여 성장 궤도에 오르세요, $userName님.", // 해리
-      3: "$userName님, 고요한 성찰의 시간입니다. 오늘의 페이지를 채워보세요.", // 오든
+      1: "미르에게 $userName님의 하루를 알려주세요.",
+      2: "오늘의 데이터를 입력하여 성장 궤도에 오르세요, $userName님.",
+      3: "$userName님, 고요한 성찰의 시간입니다. 오늘의 페이지를 채워보게나.",
     };
     return greetings[personaId] ?? "$userName님, 안녕하세요. 오늘 하루는 어떠셨나요?";
   }
 
   @override
   void dispose() {
-    _statusController.dispose();
     _actionController.dispose();
     _emotionController.dispose();
     _contextController.dispose();
@@ -54,10 +54,9 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
   }
 
   void _submit() {
-    //  빈칸 있으면 제출 불가
     if (_formKey.currentState!.validate()) {
       final request = JournalRequest(
-        status: int.tryParse(_statusController.text) ?? 0,
+        status: _statusLevel.round(),
         journalAction: _actionController.text,
         journalEmotion: _emotionController.text,
         journalContext: _contextController.text,
@@ -81,33 +80,50 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
               Text(_greeting, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 24),
             ],
-            TextFormField(
-              controller: _statusController,
-              decoration: const InputDecoration(labelText: '상태 레벨 (숫자)'),
-              keyboardType: TextInputType.number,
-              validator: (value) {
-                if (value == null || value.isEmpty) return '상태 레벨을 입력해주세요.';
-                if (int.tryParse(value) == null) return '숫자만 입력해주세요.';
-                return null;
-              },
+            
+            // 1. 상태 레벨 Slider
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('오늘의 상태 레벨: ${_statusLevel.round()}', style: const TextStyle(fontSize: 16)),
+                Slider(
+                  value: _statusLevel,
+                  min: 1,
+                  max: 3,
+                  divisions: 2,
+                  label: _statusLevel.round().toString(),
+                  onChanged: (double value) {
+                    setState(() {
+                      _statusLevel = value;
+                    });
+                  },
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
+
+            // 2. 자동 줄바꿈 TextFormField
             TextFormField(
               controller: _actionController,
               decoration: const InputDecoration(labelText: '행동'),
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
               validator: (value) => (value == null || value.isEmpty) ? '행동을 입력해주세요.' : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _emotionController,
               decoration: const InputDecoration(labelText: '감정'),
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
               validator: (value) => (value == null || value.isEmpty) ? '감정을 입력해주세요.' : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _contextController,
               decoration: const InputDecoration(labelText: '상황'),
-              maxLines: 5,
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
               validator: (value) => (value == null || value.isEmpty) ? '상황을 입력해주세요.' : null,
             ),
             const SizedBox(height: 24),
