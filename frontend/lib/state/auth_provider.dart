@@ -19,7 +19,9 @@ class AuthProvider extends ChangeNotifier {
   String? _idcheckError;
 
   bool get isLoading => _isLoading;
+
   String? get error => _error;
+
   String? get idcheckError => _idcheckError;
 
   void clearError() {
@@ -72,15 +74,17 @@ class AuthProvider extends ChangeNotifier {
         '/api/v1/auth/login',
         data: <String, dynamic>{'userId': userId, 'password': password},
       );
-      
+
       if (res.data == null || res.data is! Map<String, dynamic>) {
         _setError('서버 응답이 올바르지 않습니다.');
         return;
       }
 
-      final LoginResponse parsed = LoginResponse.fromJson(res.data as Map<String, dynamic>);
+      final LoginResponse parsed = LoginResponse.fromJson(
+        res.data as Map<String, dynamic>,
+      );
       await _authService.saveToken(parsed.token);
-      
+
       await _routeAfterAuth();
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
@@ -95,7 +99,10 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> signup({required String userId, required String password}) async {
+  Future<void> signup({
+    required String userId,
+    required String password,
+  }) async {
     _setError(null);
     _setLoading(true);
     try {
@@ -107,48 +114,44 @@ class AuthProvider extends ChangeNotifier {
         return;
       }
 
-      final Response<dynamic> res = await _dio.post<dynamic>(
-        'https://divine-tenderness-production-9284.up.railway.app/api/v1/auth/signup',
-        data: <String, dynamic>{'userId': userId, 'password': password, 'aiPersonaId': 0},
+      await _dio.post<dynamic>(
+        '/api/v1/auth/signup',
+        data: <String, dynamic>{
+          'userId': userId,
+          'password': password,
+          'aiPersonaId': 0,
+        },
       );
-      
-      if (res.data is Map<String, dynamic>) {
-        final Map<String, dynamic> data = res.data as Map<String, dynamic>;
-        
-        if (data.containsKey('token') && data['token'] is String) {
-          final String token = data['token'] as String;
-          await _authService.saveToken(token);
-        }
-      }
-      
-      await NavigationService.navigateToPersona();
+      await login(userId: userId, password: password);
     } on DioException catch (e) {
       final String? errorMessage = e.response?.data is Map<String, dynamic>
           ? e.response?.data['message'] as String?
           : null;
       _setError(errorMessage ?? e.message ?? '네트워크 오류가 발생했습니다.');
+      _setLoading(false);
     } catch (e) {
       _setError('회원가입 중 오류가 발생했습니다: ${e.toString()}');
-    } finally {
       _setLoading(false);
     }
   }
-  
+
   Future<void> logout(BuildContext context) async {
     _setLoading(true);
     try {
+      await NavigationService.navigateToLoginAndClear();
       Provider.of<JournalProvider>(context, listen: false).resetState();
-      
+
       await _authService.deleteToken();
       await UserService.instance.clearUserData();
 
       print('🔒 [LOGOUT] User logged out, all states cleared.');
 
-      await NavigationService.navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
-
+      await NavigationService.navigatorKey.currentState
+          ?.pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
     } catch (e) {
       print('🔴 [LOGOUT ERROR] Failed to logout: $e');
-      await NavigationService.navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
+      await NavigationService.navigatorKey.currentState
+          ?.pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
     } finally {
       _setLoading(false);
     }
@@ -161,7 +164,8 @@ class AuthProvider extends ChangeNotifier {
       );
 
       if (userRes.data is Map<String, dynamic>) {
-        final Map<String, dynamic> userData = userRes.data as Map<String, dynamic>;
+        final Map<String, dynamic> userData =
+            userRes.data as Map<String, dynamic>;
         final int? personaId = userData['aiPersonaId'] as int?;
         final String? name = userData['name'] as String?;
 
@@ -193,7 +197,8 @@ class AuthProvider extends ChangeNotifier {
       return;
     }
 
-    AIResponse? todayFeedback = await JournalService.instance.fetchTodayJournalFeedback();
+    AIResponse? todayFeedback = await JournalService.instance
+        .fetchTodayJournalFeedback();
     if (todayFeedback != null) {
       await UserService.instance.saveLastFeedback(todayFeedback);
       await NavigationService.navigateToFeedback(

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/state/journal_provider.dart';
 import 'package:frontend/data/models/journal_request.dart';
+import 'package:frontend/data/user/user_service.dart';
+import 'dart:math';
 
 class JournalEntryForm extends StatefulWidget {
   const JournalEntryForm({super.key});
@@ -17,6 +19,31 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
   final _emotionController = TextEditingController();
   final _contextController = TextEditingController();
 
+  String _greeting = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _setGreeting();
+  }
+
+  Future<void> _setGreeting() async {
+    final personaId = await UserService.instance.getPersonaId();
+    final userName = await UserService.instance.getUserName() ?? '사용자';
+    setState(() {
+      _greeting = _getGreetingMessage(personaId, userName);
+    });
+  }
+
+  String _getGreetingMessage(int? personaId, String userName) {
+    final greetings = {
+      1: "미르에게 $userName님의 하루를 알려주세요.", // 미르
+      2: "오늘의 데이터를 입력하여 성장 궤도에 오르세요, $userName님.", // 해리
+      3: "$userName님, 고요한 성찰의 시간입니다. 오늘의 페이지를 채워보세요.", // 오든
+    };
+    return greetings[personaId] ?? "$userName님, 안녕하세요. 오늘 하루는 어떠셨나요?";
+  }
+
   @override
   void dispose() {
     _statusController.dispose();
@@ -27,7 +54,7 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
   }
 
   void _submit() {
-    // 요구사항 5: 빈칸 있으면 제출 불가
+    //  빈칸 있으면 제출 불가
     if (_formKey.currentState!.validate()) {
       final request = JournalRequest(
         status: int.tryParse(_statusController.text) ?? 0,
@@ -50,17 +77,17 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
+            if (_greeting.isNotEmpty) ...[
+              Text(_greeting, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 24),
+            ],
             TextFormField(
               controller: _statusController,
               decoration: const InputDecoration(labelText: '상태 레벨 (숫자)'),
               keyboardType: TextInputType.number,
               validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '상태 레벨을 입력해주세요.';
-                }
-                if (int.tryParse(value) == null) {
-                  return '숫자만 입력해주세요.';
-                }
+                if (value == null || value.isEmpty) return '상태 레벨을 입력해주세요.';
+                if (int.tryParse(value) == null) return '숫자만 입력해주세요.';
                 return null;
               },
             ),

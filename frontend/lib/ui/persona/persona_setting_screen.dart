@@ -6,8 +6,6 @@ import 'package:frontend/data/user/user_service.dart';
 import 'package:frontend/core/navigation/navigation_service.dart';
 import 'package:dio/dio.dart';
 import 'package:frontend/data/api/dio_client.dart';
-
-// import 'package:frontend/data/user/user_service.dart';
 import 'package:frontend/ui/common/app_menu_button.dart';
 
 class PersonaSettingScreen extends StatefulWidget {
@@ -25,14 +23,22 @@ class _PersonaSettingScreenState extends State<PersonaSettingScreen> {
   @override
   void initState() {
     super.initState();
+    _loadInitialData();
+  }
+
+  Future<void> _loadInitialData() async {
     _personasFuture = PersonaService.instance.fetchPersonas();
+    final currentPersonaId = await UserService.instance.getPersonaId();
+    setState(() {
+      _selectedPersonaId = currentPersonaId;
+    });
   }
 
   Future<void> _updatePersona() async {
     if (_selectedPersonaId == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('페르소나를 선택해주세요.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('페르소나를 선택해주세요.')),
+      );
       return;
     }
 
@@ -46,22 +52,30 @@ class _PersonaSettingScreenState extends State<PersonaSettingScreen> {
         data: {'personaId': _selectedPersonaId},
       );
       await UserService.instance.savePersonaId(_selectedPersonaId!);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('페르소나가 변경되었습니다.')),
+      );
+      
+      await Future.delayed(const Duration(milliseconds: 500));
+
       final bool hasName = await UserService.instance.hasUserName();
       if (hasName) {
-        // 이름이 있으면 홈 화면(기록 화면)으로 이동
         await NavigationService.navigateToRecord(replace: true);
       } else {
-        // 이름이 없으면 이름 설정 화면으로 이동
         await NavigationService.navigateToNameSetting(replace: true);
       }
+
     } on DioException catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('오류 발생: ${e.message}')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('오류 발생: ${e.message}')),
+      );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -72,19 +86,14 @@ class _PersonaSettingScreenState extends State<PersonaSettingScreen> {
         title: const Text('AI 페르소나 선택'),
         actions: const [AppMenuButton()],
       ),
-
       body: FutureBuilder<List<Persona>>(
         future: _personasFuture,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (snapshot.connectionState == ConnectionState.waiting && _selectedPersonaId == null) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (snapshot.hasError ||
-              !snapshot.hasData ||
-              snapshot.data!.isEmpty) {
-            return Center(
-              child: Text(snapshot.error?.toString() ?? '페르소나를 불러올 수 없습니다.'),
-            );
+          if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text(snapshot.error?.toString() ?? '페르소나를 불러올 수 없습니다.'));
           }
 
           final personas = snapshot.data!;
@@ -100,10 +109,7 @@ class _PersonaSettingScreenState extends State<PersonaSettingScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  '당신과 함께할 AI 코치를 선택해주세요.',
-                  style: TextStyle(fontSize: 18),
-                ),
+                const Text('당신과 함께할 AI 코치를 선택해주세요.', style: TextStyle(fontSize: 18)),
                 const SizedBox(height: 20),
                 DropdownButtonFormField<int>(
                   value: _selectedPersonaId,
@@ -156,18 +162,13 @@ class _PersonaSettingScreenState extends State<PersonaSettingScreen> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Color(
-                    int.parse('0xFF${persona.themeColor.substring(1)}'),
-                  ),
+                  color: Color(int.parse('0xFF${persona.themeColor.substring(1)}')),
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 '"${persona.tagline}"',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontStyle: FontStyle.italic,
-                ),
+                style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
               ),
               const SizedBox(height: 16),
               const Divider(),
@@ -176,9 +177,7 @@ class _PersonaSettingScreenState extends State<PersonaSettingScreen> {
               const SizedBox(height: 20),
               Wrap(
                 spacing: 8.0,
-                children: persona.keywords
-                    .map((keyword) => Chip(label: Text(keyword)))
-                    .toList(),
+                children: persona.keywords.map((keyword) => Chip(label: Text(keyword))).toList(),
               ),
             ],
           ),

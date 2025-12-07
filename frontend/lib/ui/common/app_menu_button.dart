@@ -1,10 +1,6 @@
 // frontend/lib/ui/common/app_menu_button.dart
 import 'package:flutter/material.dart';
 import 'package:frontend/core/navigation/navigation_service.dart';
-import 'package:frontend/data/auth/auth_service.dart';
-import 'package:frontend/data/api/journal_service.dart';
-import 'package:frontend/data/models/ai_response.dart';
-import 'package:frontend/data/user/user_service.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/state/auth_provider.dart';
 import 'package:frontend/state/journal_provider.dart';
@@ -115,7 +111,12 @@ class AppMenuButton extends StatelessWidget {
     );
 
     if (confirm == true) {
-      await Provider.of<AuthProvider>(context, listen: false).logout(context);
+      // 1. 먼저 화면을 전환
+      await NavigationService.navigateToLoginAndClear();
+      // 2. 잠시 딜레이 - 화면 전환이 완료될 시간을 확보
+      await Future.delayed(const Duration(milliseconds: 50));
+      // 3. 그 다음에 상태 초기화 및 로그아웃 로직을 호출
+      Provider.of<AuthProvider>(context, listen: false).logout(context);
     }
   }
 }
