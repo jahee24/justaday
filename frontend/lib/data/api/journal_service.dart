@@ -16,11 +16,11 @@ class JournalService {
       );
 
       if (res.statusCode == 200 && res.data is Map<String, dynamic>) {
-        print('✅ [JOURNAL SERVICE] Feedback ready (200)');
+        // print('✅ [JOURNAL SERVICE] Feedback ready (200)');
         return AIResponse.fromJson(res.data as Map<String, dynamic>);
       }
       if (res.statusCode == 202) {
-        print('⏳ [JOURNAL SERVICE] Feedback pending (202)');
+        // print('⏳ [JOURNAL SERVICE] Feedback pending (202)');
         return null;
       }
       if (res.statusCode == 204) {
@@ -36,7 +36,7 @@ class JournalService {
         return null;
       }
 
-      print('⚠️ [JOURNAL SERVICE ERROR] ${e.response?.statusCode}: ${e.message}');
+      // print('⚠️ [JOURNAL SERVICE ERROR] ${e.response?.statusCode}: ${e.message}');
       // 다른 에러는 상위로 전파
       rethrow;
     } catch (_) {

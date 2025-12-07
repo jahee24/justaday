@@ -7,61 +7,53 @@ class NavigationService {
       GlobalKey<NavigatorState>();
 
   static Future<void> navigateToLoginAndClear() async {
-    final NavigatorState? navigator = navigatorKey.currentState;
-    if (navigator == null) return;
-    await navigator.pushNamedAndRemoveUntil('/login', (Route<dynamic> _) => false);
+    navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (Route<dynamic> _) => false);
   }
 
   static Future<void> navigateToPersona({bool replace = true}) async {
-    final NavigatorState? navigator = navigatorKey.currentState;
-    if (navigator == null) return;
     if (replace) {
-      await navigator.pushReplacementNamed('/persona');
+      await navigatorKey.currentState?.pushReplacementNamed('/persona');
     } else {
-      await navigator.pushNamed('/persona');
+      await navigatorKey.currentState?.pushNamed('/persona');
     }
   }
 
   static Future<void> navigateToRecord({bool replace = true}) async {
-    final NavigatorState? navigator = navigatorKey.currentState;
-    if (navigator == null) return;
     if (replace) {
-      await navigator.pushReplacementNamed('/record');
+      await navigatorKey.currentState?.pushReplacementNamed('/record');
     } else {
-      await navigator.pushNamed('/record');
+      await navigatorKey.currentState?.pushNamed('/record');
     }
   }
 
   static Future<void> navigateToNameSetting({bool replace = true}) async {
-    final NavigatorState? navigator = navigatorKey.currentState;
-    if (navigator == null) return;
     if (replace) {
-      await navigator.pushReplacementNamed('/name');
+      await navigatorKey.currentState?.pushReplacementNamed('/name');
     } else {
-      await navigator.pushNamed('/name');
+      await navigatorKey.currentState?.pushNamed('/name');
     }
+  }
+
+  static Future<void> navigateToSettings() async {
+    await navigatorKey.currentState?.pushNamed('/settings');
   }
 
   static Future<void> navigateToFeedback({
     Object? arguments,
     bool replace = false,
   }) async {
-    final NavigatorState? navigator = navigatorKey.currentState;
-    if (navigator == null) return;
     if (replace) {
-      await navigator.pushReplacementNamed('/feedback', arguments: arguments);
+      await navigatorKey.currentState?.pushReplacementNamed('/feedback', arguments: arguments);
     } else {
-      await navigator.pushNamed('/feedback', arguments: arguments);
+      await navigatorKey.currentState?.pushNamed('/feedback', arguments: arguments);
     }
   }
 
   static Future<void> navigateToFeedbackList({bool replace = false}) async {
-    final NavigatorState? navigator = navigatorKey.currentState;
-    if (navigator == null) return;
     if (replace) {
-      await navigator.pushReplacementNamed('/feedback-list');
+      await navigatorKey.currentState?.pushReplacementNamed('/feedback-list');
     } else {
-      await navigator.pushNamed('/feedback-list');
+      await navigatorKey.currentState?.pushNamed('/feedback-list');
     }
   }
 
@@ -85,5 +77,3 @@ class NavigationService {
     );
   }
 }
-
-

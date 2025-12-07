@@ -9,6 +9,7 @@ import 'package:frontend/ui/journal/main_record_screen.dart';
 import 'package:frontend/ui/journal/feedback_screen.dart';
 import 'package:frontend/ui/journal/feedback_list_screen.dart';
 import 'package:frontend/ui/profile/name_setting_screen.dart';
+import 'package:frontend/ui/profile/setting_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +18,6 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         navigatorKey: NavigationService.navigatorKey,
-        title: 'My First App',
+        title: 'Just A Day',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         ),
@@ -37,12 +37,11 @@ class MyApp extends StatelessWidget {
           '/persona': (_) => const PersonaSettingScreen(),
           '/name': (_) => const NameSettingScreen(),
           '/record': (_) => const MainRecordScreen(),
-          '/feedback': (_) => const MainRecordScreen(),
+          // '/feedback': (_) => const MainRecordScreen(),
           '/feedback-list': (_) => const FeedbackListScreen(),
+          '/settings': (_) => const SettingScreen(),
         },
       ),
     );
   }
 }
-
-// 기존 샘플 홈 화면은 제거하고 라우팅으로 대체

@@ -129,7 +129,7 @@ class _PersonaSettingScreenState extends State<PersonaSettingScreen> {
                     });
                   },
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 26),
                 if (selectedPersona != null)
                   Expanded(child: _buildPersonaDetails(selectedPersona)),
                 const Spacer(),

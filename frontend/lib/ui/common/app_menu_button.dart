@@ -37,27 +37,17 @@ class AppMenuButton extends StatelessWidget {
             ],
           ),
         ),
-        const PopupMenuItem<String>(
-          value: 'persona_change',
-          child: Row(
-            children: <Widget>[
-              Icon(Icons.person, size: 20),
-              SizedBox(width: 8),
-              Text('페르소나 변경'),
-            ],
-          ),
-        ),
-        const PopupMenuItem<String>(
-          value: 'name_setting',
-          child: Row(
-            children: <Widget>[
-              Icon(Icons.badge, size: 20),
-              SizedBox(width: 8),
-              Text('이름 설정/확인'),
-            ],
-          ),
-        ),
         const PopupMenuDivider(),
+        const PopupMenuItem<String>(
+          value: 'settings',
+          child: Row(
+            children: <Widget>[
+              Icon(Icons.settings, size: 20),
+              SizedBox(width: 8),
+              Text('설정'),
+            ],
+          ),
+        ),
         const PopupMenuItem<String>(
           value: 'logout',
           child: Row(
@@ -75,21 +65,16 @@ class AppMenuButton extends StatelessWidget {
   Future<void> _handleMenuSelection(BuildContext context, String value) async {
     switch (value) {
       case 'journal_main':
-        // 현재 화면이 메인 화면이 아닐 경우에만 이동
         if (ModalRoute.of(context)?.settings.name != '/record') {
           await NavigationService.navigateToRecord(replace: true);
         }
-        // 메인 화면에 있다면, 상태만 갱신하여 UI를 다시 그리도록 함
         context.read<JournalProvider>().checkSubmissionStatus();
         break;
       case 'feedback_list':
         await NavigationService.navigateToFeedbackList();
         break;
-      case 'persona_change':
-        await NavigationService.navigateToPersona();
-        break;
-      case 'name_setting':
-        await NavigationService.navigateToNameSetting(replace: false);
+      case 'settings':
+        await NavigationService.navigateToSettings();
         break;
       case 'logout':
         await _handleLogout(context);
@@ -116,7 +101,7 @@ class AppMenuButton extends StatelessWidget {
     if (confirm == true) {
       // 1. 다른 Provider들의 상태를 먼저 초기화
       journalProvider.resetState();
-      
+
       // 2. AuthProvider의 로그아웃 로직(데이터 삭제) 호출
       await authProvider.logout();
 

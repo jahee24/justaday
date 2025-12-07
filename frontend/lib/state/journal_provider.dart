@@ -56,7 +56,7 @@ class JournalProvider extends ChangeNotifier {
         _error = "상태를 확인하는 중 오류가 발생했습니다.";
         _hasSubmittedToday = false;
         _latestFeedback = null;
-        print('🔴 [STATUS CHECK ERROR] $e');
+        // print('🔴 [STATUS CHECK ERROR] $e');
       }
     } finally {
       _isCheckingStatus = false;
@@ -77,7 +77,7 @@ class JournalProvider extends ChangeNotifier {
       if (res.statusCode == 201 || res.statusCode == 200) {
         await UserService.instance.markJournalSubmittedToday();
 
-        print('⏳ [POLLING START] AI feedback not ready yet, starting polling...');
+        // print('⏳ [POLLING START] AI feedback not ready yet, starting polling...');
         // 4. 폴링 시작 (기존 로직 유지)
         await _pollForFeedback(maxAttempts: 8, intervalSeconds: 3);
         // 5. 폴링이 끝나면 (성공이든 실패든) 상태를 다시 확인하여 UI를 갱신
@@ -85,7 +85,7 @@ class JournalProvider extends ChangeNotifier {
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 409) {
-        print('⚠️ [ALREADY SUBMITTED] Journal already submitted today');
+        // print('⚠️ [ALREADY SUBMITTED] Journal already submitted today');
         await UserService.instance.markJournalSubmittedToday();
         // 이미 제출된 경우에도 상태를 다시 확인하여 UI를 동기화
         await checkSubmissionStatus();
@@ -105,24 +105,24 @@ class JournalProvider extends ChangeNotifier {
     required int intervalSeconds,
   }) async {
     for (int attempt = 1; attempt <= maxAttempts; attempt++) {
-      print('🔄 [POLLING] Attempt $attempt/$maxAttempts...');
+      // print('🔄 [POLLING] Attempt $attempt/$maxAttempts...');
       await Future.delayed(Duration(seconds: intervalSeconds));
       try {
         AIResponse? feedback = await JournalService.instance.fetchTodayJournalFeedback();
         if (feedback != null && (feedback.responseCode != 102 && feedback.mentText.isNotEmpty)) {
-          print('✅ [POLLING] Feedback found on attempt $attempt');
+          // print('✅ [POLLING] Feedback found on attempt $attempt');
           return feedback;
         }
-        print('⏳ [POLLING] No feedback yet, retrying...');
+        // print('⏳ [POLLING] No feedback yet, retrying...');
       } catch (e) {
-        print('⚠️ [POLLING ERROR] Attempt $attempt failed: $e');
+        // print('⚠️ [POLLING ERROR] Attempt $attempt failed: $e');
         if (e is DioException && e.response?.statusCode == 401) {
-          print('❌ [POLLING ABORT] Authentication error, stopping polling');
+          // print('❌ [POLLING ABORT] Authentication error, stopping polling');
           return null;
         }
       }
     }
-    print('❌ [POLLING] Max attempts reached, no feedback available');
+    // print('❌ [POLLING] Max attempts reached, no feedback available');
     return null;
   }
 
@@ -130,12 +130,12 @@ class JournalProvider extends ChangeNotifier {
   // 이 부분은 상태 갱신 후 MainRecordScreen에서 처리하도록 비워두거나 다른 방식으로 처리해야 합니다.
   // 여기서는 일단 그대로 두겠습니다.
   Future<void> _showDelayedFeedbackMessage() async {
-    print('💬 [INFO] AI 피드백이 지연되고 있습니다. 잠시 후 홈 화면에서 확인해주세요.');
+    // print('💬 [INFO] AI 피드백이 지연되고 있습니다. 잠시 후 홈 화면에서 확인해주세요.');
     // await NavigationService.navigateToFeedbackList(replace: true); // 화면 이동 제거
   }
 
   Future<void> _handleSubmissionError(String message) async {
-    print('🔴 [SUBMIT ERROR] _handleSubmissionError: Error Message: $message');
+    // print('🔴 [SUBMIT ERROR] _handleSubmissionError: Error Message: $message');
     _setError(message); // 에러 상태만 설정
     // await LogErrorService.report(message);
     // await NavigationService.showTemporaryErrorDialog();
@@ -148,6 +148,6 @@ class JournalProvider extends ChangeNotifier {
     _isCheckingStatus = true;
     _latestFeedback = null; // 6. resetState에도 추가
     notifyListeners();
-    print('🔄 [STATE RESET] JournalProvider has been reset.');
+    // print('🔄 [STATE RESET] JournalProvider has been reset.');
   }
 }

@@ -40,7 +40,7 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
     final greetings = {
       1: "미르에게 $userName님의 하루를 알려주세요.",
       2: "오늘의 데이터를 입력하여 성장 궤도에 오르세요, $userName님.",
-      3: "$userName님, 고요한 성찰의 시간입니다. 오늘의 페이지를 채워보게나.",
+      3: "$userName님, 고요한 성찰의 시간입니다. 오늘의 페이지를 채워보세요.",
     };
     return greetings[personaId] ?? "$userName님, 안녕하세요. 오늘 하루는 어떠셨나요?";
   }

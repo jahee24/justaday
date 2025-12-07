@@ -19,7 +19,7 @@ class PersonaService {
       }
       return [];
     } catch (e) {
-      print('Failed to fetch personas: $e');
+      // print('Failed to fetch personas: $e');
       throw Exception('페르소나 목록을 불러오는 데 실패했습니다.');
     }
   }

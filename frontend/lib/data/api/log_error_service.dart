@@ -16,7 +16,7 @@ class LogErrorService {
   static Future<void> report(String message) async {
     try {
       final String? token = await AuthService.instance.getToken();
-      print('📝 [LOG REPORT] Token exists: ${token != null && token.isNotEmpty}. Token value: $token');
+      // print('📝 [LOG REPORT] Token exists: ${token != null && token.isNotEmpty}. Token value: $token');
       await _dio.post<dynamic>(
         '/api/v1/log/error/message',
         data: <String, dynamic>{'message': message},

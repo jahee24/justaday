@@ -44,7 +44,7 @@ class UserService {
     final DateTime now = DateTime.now();
     final String today = '${now.year}-${now.month}-${now.day}';
     final String? lastDate = prefs.getString(_keyLastJournalDate);
-    print('lastDate: $lastDate, today: $today');
+    // print('lastDate: $lastDate, today: $today');
     return lastDate != today;
   }
 

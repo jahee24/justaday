@@ -19,7 +19,9 @@ class AuthProvider extends ChangeNotifier {
   String? _idcheckError;
 
   bool get isLoading => _isLoading;
+
   String? get error => _error;
+
   String? get idcheckError => _idcheckError;
 
   void clearError() {
@@ -97,10 +99,7 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> signup({
-    required String userId,
-    required String password,
-  }) async {
+  Future<void> signup({ required String userId, required String password,}) async {
     _setError(null);
     _setLoading(true);
     try {
@@ -132,7 +131,7 @@ class AuthProvider extends ChangeNotifier {
       _setLoading(false);
     }
   }
-  
+
   // BuildContext 인자 제거
   Future<void> logout() async {
     _setLoading(true);
@@ -140,9 +139,9 @@ class AuthProvider extends ChangeNotifier {
       // JournalProvider 상태 초기화는 이제 AppMenuButton에서 담당
       await _authService.deleteToken();
       await UserService.instance.clearUserData();
-      print('🔒 [LOGOUT] User data and token cleared.');
+      // print('🔒 [LOGOUT] User data and token cleared.');
     } catch (e) {
-      print('🔴 [LOGOUT ERROR] Failed to clear data: $e');
+      // print('🔴 [LOGOUT ERROR] Failed to clear data: $e');
     } finally {
       _setLoading(false);
     }
@@ -188,17 +187,23 @@ class AuthProvider extends ChangeNotifier {
       return;
     }
 
-    AIResponse? todayFeedback = await JournalService.instance
-        .fetchTodayJournalFeedback();
-    if (todayFeedback != null) {
-      await UserService.instance.saveLastFeedback(todayFeedback);
-      await NavigationService.navigateToFeedback(
-        arguments: todayFeedback,
-        replace: true,
-      );
-      return;
-    }
-
     await NavigationService.navigateToRecord();
+  }
+
+  Future<bool> deleteAccount() async {
+    _setLoading(true);
+    notifyListeners();
+    try {
+      await _dio.delete('/api/v1/user');
+      // 성공 시, 로그아웃과 동일하게 로컬 데이터 삭제
+      await _authService.deleteToken();
+      await UserService.instance.clearUserData();
+      return true;
+    } catch (e) {
+      _setError('계정 삭제 중 오류가 발생했습니다.');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
   }
 }

@@ -17,14 +17,14 @@ class AuthInterceptor extends Interceptor {
     final String? token = await _authService.getToken();
     if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
-      print('🔑 [AUTH INTERCEPTOR] Token: $token');
+      // print('🔑 [AUTH INTERCEPTOR] Token: $token');
     }
     handler.next(options);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    print('🛑 [INTERCEPTOR ERROR] uri: ${err.requestOptions.uri}, Status: ${err.response?.statusCode}, Time: ${DateTime.now()}');
+    // print('🛑 [INTERCEPTOR ERROR] uri: ${err.requestOptions.uri}, Status: ${err.response?.statusCode}, Time: ${DateTime.now()}');
     final int? statusCode = err.response?.statusCode;
     final String? path = err.requestOptions.path;
     print(
@@ -32,12 +32,12 @@ class AuthInterceptor extends Interceptor {
     );
     if (statusCode == 401) {
       if (path!.contains('/log/latest')) {
-        print('⚠️ [AUTH WARNING] 401 on polling endpoint, not logging out');
+        // print('⚠️ [AUTH WARNING] 401 on polling endpoint, not logging out');
         super.onError(err, handler);
         return;
       }
 
-      print('🚨 [AUTH ERROR] 401 detected. Navigating to login.');
+      // print('🚨 [AUTH ERROR] 401 detected. Navigating to login.');
       _handleUnauthorized();
     }
     handler.next(err);

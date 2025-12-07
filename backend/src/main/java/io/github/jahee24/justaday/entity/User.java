@@ -1,4 +1,3 @@
-//src/main/java/io/github/jahee24/justaday/entity/User.java
 package io.github.jahee24.justaday.entity;
 
 import jakarta.persistence.*;
@@ -7,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -44,4 +45,7 @@ public class User {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<JournalLog> journalLogs = new ArrayList<>();
 }
