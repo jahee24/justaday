@@ -1,14 +1,14 @@
 //lib/data/api/dio_client.dart
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:frontend/data/api/interceptors/auth_interceptor.dart';
+import 'package:justaday/data/api/interceptors/auth_interceptor.dart';
 
 class DioClient {
   DioClient._internal() {
     final BaseOptions baseOptions = BaseOptions(
       baseUrl: 'https://divine-tenderness-production-9284.up.railway.app',
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 40),
+      connectTimeout: const Duration(seconds: 20),
+      receiveTimeout: const Duration(seconds: 60),
       sendTimeout: const Duration(seconds: 20),
       contentType: 'application/json',
       headers: <String, dynamic>{

@@ -1,9 +1,9 @@
 // frontend/lib/ui/common/app_menu_button.dart
 import 'package:flutter/material.dart';
-import 'package:frontend/core/navigation/navigation_service.dart';
+import 'package:justaday/core/navigation/navigation_service.dart';
 import 'package:provider/provider.dart';
-import 'package:frontend/state/auth_provider.dart';
-import 'package:frontend/state/journal_provider.dart';
+import 'package:justaday/state/auth_provider.dart';
+import 'package:justaday/state/journal_provider.dart';
 
 class AppMenuButton extends StatelessWidget {
   const AppMenuButton({super.key});

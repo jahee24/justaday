@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/data/api/dio_client.dart';
-import 'package:frontend/data/api/log_error_service.dart';
-import 'package:frontend/data/models/ai_response.dart';
-import 'package:frontend/ui/common/app_menu_button.dart';
+import 'package:justaday/data/api/dio_client.dart';
+import 'package:justaday/data/api/log_error_service.dart';
+import 'package:justaday/data/models/ai_response.dart';
+import 'package:justaday/ui/common/app_menu_button.dart';
 import 'package:intl/intl.dart';
 
 class FeedbackListScreen extends StatefulWidget {

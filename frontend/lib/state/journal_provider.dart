@@ -1,14 +1,14 @@
 // lib/state/journal_provider.dart
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
-import 'package:frontend/core/navigation/navigation_service.dart';
-import 'package:frontend/data/api/dio_client.dart';
-import 'package:frontend/data/api/journal_service.dart';
-import 'package:frontend/data/api/log_error_service.dart';
-import 'package:frontend/data/models/ai_response.dart';
-import 'package:frontend/data/models/journal_request.dart';
-import 'package:frontend/data/user/user_service.dart';
-import 'package:frontend/data/auth/auth_service.dart';
+import 'package:justaday/core/navigation/navigation_service.dart';
+import 'package:justaday/data/api/dio_client.dart';
+import 'package:justaday/data/api/journal_service.dart';
+import 'package:justaday/data/api/log_error_service.dart';
+import 'package:justaday/data/models/ai_response.dart';
+import 'package:justaday/data/models/journal_request.dart';
+import 'package:justaday/data/user/user_service.dart';
+import 'package:justaday/data/auth/auth_service.dart';
 
 class JournalProvider extends ChangeNotifier {
   final Dio _dio = DioClient.dio;

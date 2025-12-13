@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:frontend/state/journal_provider.dart';
-import 'package:frontend/data/models/journal_request.dart';
-import 'package:frontend/data/user/user_service.dart';
+import 'package:justaday/state/journal_provider.dart';
+import 'package:justaday/data/models/journal_request.dart';
+import 'package:justaday/data/user/user_service.dart';
 
 class JournalEntryForm extends StatefulWidget {
   const JournalEntryForm({super.key});

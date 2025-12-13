@@ -1,7 +1,9 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:frontend/state/auth_provider.dart';
+import 'package:justaday/state/auth_provider.dart';
 import 'dart:async';
+import 'package:url_launcher/url_launcher.dart'; // url_launcher import
 
 class LoginSignupScreen extends StatefulWidget {
   const LoginSignupScreen({super.key});
@@ -16,6 +18,9 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
   final _passwordController = TextEditingController();
   bool _isLogin = true;
   Timer? _debounce;
+
+  // 1. 개인정보 처리방침 동의 상태 변수 추가
+  bool _isPrivacyPolicyAgreed = false;
 
   @override
   void initState() {
@@ -50,12 +55,25 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
     setState(() {});
   }
 
+  // 2. URL을 여는 함수 추가
+  Future<void> _launchURL(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri)) {
+      // URL을 열 수 없을 때 사용자에게 알림
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('링크를 열 수 없습니다: $url')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    // 4. 회원가입 버튼 활성화 조건 수정
     final isButtonEnabled = _userIdController.text.isNotEmpty &&
-                           _passwordController.text.isNotEmpty &&
-                           !auth.isLoading;
+        _passwordController.text.isNotEmpty &&
+        !auth.isLoading &&
+        (_isLogin || _isPrivacyPolicyAgreed); // 로그인 모드가 아니면 동의해야 활성화
 
     return Scaffold(
       appBar: AppBar(title: Text(_isLogin ? '로그인' : '회원가입')),
@@ -94,6 +112,42 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                     },
                   ),
                   if (!_isLogin) ...[
+                    const SizedBox(height: 16),
+                    // 3. 개인정보 처리방침 동의 UI 추가
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Checkbox(
+                          value: _isPrivacyPolicyAgreed,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _isPrivacyPolicyAgreed = value ?? false;
+                            });
+                          },
+                        ),
+                        RichText(
+                          text: TextSpan(
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            children: [
+                              const TextSpan(text: ' '),
+                              TextSpan(
+                                text: '개인정보 처리방침',
+                                style: const TextStyle(
+                                  decoration: TextDecoration.underline,
+                                  color: Colors.blue,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+
+                                    _launchURL('https://jahee24.github.io/justaday_Privacy/');
+                                  },
+                              ),
+                              const TextSpan(text: '에 동의합니다.'),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 16),
                     Container(
                       padding: const EdgeInsets.all(12),
@@ -137,7 +191,10 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                   ),
                   TextButton(
                     onPressed: auth.isLoading ? null : () {
-                      setState(() => _isLogin = !_isLogin);
+                      setState(() {
+                        _isLogin = !_isLogin;
+                        _isPrivacyPolicyAgreed = false; // 모드 변경 시 동의 상태 초기화
+                      });
                       context.read<AuthProvider>().clearError();
                     },
                     child: Text(_isLogin ? '계정이 없으신가요? 회원가입' : '이미 계정이 있으신가요? 로그인'),
@@ -153,6 +210,14 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
 
   Future<void> _handleSubmit(AuthProvider auth) async {
     if (!_formKey.currentState!.validate()) return;
+
+    // 회원가입 시 동의 여부 재확인
+    if (!_isLogin && !_isPrivacyPolicyAgreed) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('개인정보 처리방침에 동의해주세요.')),
+      );
+      return;
+    }
 
     final String userId = _userIdController.text.trim();
     final String password = _passwordController.text.trim();

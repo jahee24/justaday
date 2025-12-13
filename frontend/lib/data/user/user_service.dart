@@ -3,7 +3,7 @@
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:frontend/data/models/ai_response.dart';
+import 'package:justaday/data/models/ai_response.dart';
 
 class UserService {
   UserService._();

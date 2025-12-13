@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:frontend/core/navigation/navigation_service.dart';
-import 'package:frontend/state/auth_provider.dart';
-import 'package:frontend/state/journal_provider.dart';
-import 'package:frontend/ui/auth/login_signup_screen.dart';
-import 'package:frontend/ui/persona/persona_setting_screen.dart';
-import 'package:frontend/ui/journal/main_record_screen.dart';
-import 'package:frontend/ui/journal/feedback_screen.dart';
-import 'package:frontend/ui/journal/feedback_list_screen.dart';
-import 'package:frontend/ui/profile/name_setting_screen.dart';
-import 'package:frontend/ui/profile/setting_screen.dart';
+import 'package:justaday/core/navigation/navigation_service.dart';
+import 'package:justaday/state/auth_provider.dart';
+import 'package:justaday/state/journal_provider.dart';
+import 'package:justaday/ui/auth/login_signup_screen.dart';
+import 'package:justaday/ui/persona/persona_setting_screen.dart';
+import 'package:justaday/ui/journal/main_record_screen.dart';
+import 'package:justaday/ui/journal/feedback_screen.dart';
+import 'package:justaday/ui/journal/feedback_list_screen.dart';
+import 'package:justaday/ui/profile/name_setting_screen.dart';
+import 'package:justaday/ui/profile/setting_screen.dart';
 
 void main() {
   runApp(const MyApp());

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:frontend/state/journal_provider.dart';
-import 'package:frontend/ui/common/app_menu_button.dart';
-import 'package:frontend/ui/journal/widgets/journal_entry_form.dart';
-import 'package:frontend/ui/journal/widgets/today_feedback_view.dart';
+import 'package:justaday/state/journal_provider.dart';
+import 'package:justaday/ui/common/app_menu_button.dart';
+import 'package:justaday/ui/journal/widgets/journal_entry_form.dart';
+import 'package:justaday/ui/journal/widgets/today_feedback_view.dart';
 
 class MainRecordScreen extends StatefulWidget {
   const MainRecordScreen({super.key});

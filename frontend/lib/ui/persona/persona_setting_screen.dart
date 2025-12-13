@@ -1,12 +1,12 @@
 // lib/ui/persona/persona_setting_screen.dart
 import 'package:flutter/material.dart';
-import 'package:frontend/data/api/persona_service.dart';
-import 'package:frontend/data/models/persona.dart';
-import 'package:frontend/data/user/user_service.dart';
-import 'package:frontend/core/navigation/navigation_service.dart';
+import 'package:justaday/data/api/persona_service.dart';
+import 'package:justaday/data/models/persona.dart';
+import 'package:justaday/data/user/user_service.dart';
+import 'package:justaday/core/navigation/navigation_service.dart';
 import 'package:dio/dio.dart';
-import 'package:frontend/data/api/dio_client.dart';
-import 'package:frontend/ui/common/app_menu_button.dart';
+import 'package:justaday/data/api/dio_client.dart';
+import 'package:justaday/ui/common/app_menu_button.dart';
 
 class PersonaSettingScreen extends StatefulWidget {
   const PersonaSettingScreen({super.key});

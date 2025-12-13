@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/navigation/navigation_service.dart';
-import 'package:frontend/ui/common/app_menu_button.dart';
+import 'package:justaday/core/navigation/navigation_service.dart';
+import 'package:justaday/ui/common/app_menu_button.dart';
 import 'package:provider/provider.dart';
-import 'package:frontend/state/auth_provider.dart';
-import 'package:frontend/state/journal_provider.dart';
-import 'package:frontend/data/api/dio_client.dart';
+import 'package:justaday/state/auth_provider.dart';
+import 'package:justaday/state/journal_provider.dart';
+import 'package:justaday/data/api/dio_client.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingScreen extends StatelessWidget {

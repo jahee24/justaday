@@ -1,10 +1,10 @@
 // lib/ui/journal/feedback_screen.dart
 import 'package:flutter/material.dart';
-import 'package:frontend/core/navigation/navigation_service.dart';
-import 'package:frontend/data/api/log_error_service.dart';
-import 'package:frontend/data/models/ai_response.dart';
-import 'package:frontend/data/user/user_service.dart';
-import 'package:frontend/ui/common/app_menu_button.dart';
+import 'package:justaday/core/navigation/navigation_service.dart';
+import 'package:justaday/data/api/log_error_service.dart';
+import 'package:justaday/data/models/ai_response.dart';
+import 'package:justaday/data/user/user_service.dart';
+import 'package:justaday/ui/common/app_menu_button.dart';
 
 class FeedbackScreen extends StatefulWidget {
   const FeedbackScreen({super.key});

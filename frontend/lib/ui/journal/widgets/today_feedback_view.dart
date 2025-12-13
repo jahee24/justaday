@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/data/models/ai_response.dart';
-import 'package:frontend/data/user/user_service.dart';
+import 'package:justaday/data/models/ai_response.dart';
+import 'package:justaday/data/user/user_service.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
 

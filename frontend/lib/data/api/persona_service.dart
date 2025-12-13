@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:frontend/data/api/dio_client.dart';
-import 'package:frontend/data/models/persona.dart';
+import 'package:justaday/data/api/dio_client.dart';
+import 'package:justaday/data/models/persona.dart';
 
 class PersonaService {
   PersonaService._();
