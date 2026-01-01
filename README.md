@@ -1,8 +1,11 @@
-# Justaday (저스트어데이) 📝
+
+# ![40.png](images/40.png) Justaday (저스트어데이) 
 
 > **"당신의 하루는 어떤가요? AI가 당신의 감정을 듣고, 위로와 솔루션을 건넵니다."**
 
-**Justaday**는 사용자의 하루를 기록하고, 3가지 성격의 AI 페르소나가 맞춤형 피드백과 행동 지침(Mini Plans)을 제공하는 **AI 감정 케어 저널 서비스**입니다.
+[![One Store](images/one_downloadbadge_red_white_kr.png)](https://m.onestore.co.kr/v2/ko-kr/app/0001003418)
+
+**Just a Day**는 사용자의 하루를 기록하고, 3가지 성격의 AI 페르소나가 맞춤형 피드백과 행동 지침(Mini Plans)을 제공하는 **AI 감정 케어 저널 서비스**입니다.
 
 단순한 기록을 넘어, AI와의 상호작용을 통해 사용자가 자신의 감정을 객관적으로 바라보고 긍정적인 습관을 형성하도록 돕습니다.
 
@@ -10,9 +13,9 @@
 
 ## 📱 Screenshots
 
-| 로그인 & 회원가입 | 페르소나 선택 | 일기 작성 | AI 피드백 |
-| :---: | :---: | :---: | :---: |
-| <img src="" width="200" alt="Login Screen"/> | <img src="" width="200" alt="Persona Select"/> | <img src="" width="200" alt="Journal Entry"/> | <img src="" width="200" alt="AI Feedback"/> |
+|                                               로그인 & 회원가입                                                |                                            페르소나 선택                                            | 일기 작성 | AI 피드백 |
+|:-------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------:| :---: | :---: |
+| <img src="images/%ED%9A%8C%EC%9B%90%EA%B0%80%EC%9E%85.png" width="200" alt="Login Screen"/> | <img src="images/%EB%AF%B8%EB%A5%B4%EC%84%A4%EC%A0%95.png" width="200" alt="Persona Select"/> | <img src="images/%EC%A0%80%EB%84%90%EC%9E%85%EB%A0%A5.png" width="200" alt="Journal Entry"/> | <img src="images/%EC%98%A4%EB%8A%98%EC%9D%98%ED%94%BC%EB%93%9C%EB%B0%B1.png" width="200" alt="AI Feedback"/> |
 
 ---
 
@@ -27,7 +30,7 @@ LLM(Large Language Model)을 활용해 사용자의 감정을 분석하고, 즉�
 ## ✨ Key Features
 
 ### 1. 📝 하루 기록 (Daily Journal)
-- **4단계 입력**: 오늘의 상태(1~5점), 주요 행동, 감정, 상황을 구조화하여 기록합니다.
+- **직관적인 입력**: 슬라이더(Slider)를 이용한 상태 레벨 입력과 자동 줄바꿈 텍스트 필드로 사용자 경험을 최적화했습니다.
 - **1일 1로그**: 하루에 하나의 기록만 남길 수 있어 꾸준한 습관 형성을 돕습니다.
 
 ### 2. 🤖 AI 페르소나 피드백
@@ -37,13 +40,22 @@ LLM(Large Language Model)을 활용해 사용자의 감정을 분석하고, 즉�
 - **오든 (ODEN) 🟢**: 고전의 지혜와 평온함을 전하는 멘토 (철학 중심)
 
 ### 3. ⚡️ 실시간 AI 코칭 (Real-time Coaching)
-- **즉시 응답**: 저널 제출 시 AI 처리를 기다리지 않고 즉시 저장됩니다.
-- **비동기 처리**: 백엔드에서 별도 스레드로 AI 파이프라인이 실행됩니다.
+- **비동기 처리**: 백엔드에서 별도 스레드로 AI 파이프라인이 실행되어 사용자 대기 시간을 최소화했습니다.
 - **실시간 확인**: 프론트엔드 폴링(Polling)을 통해 피드백 생성 즉시 화면에 표시됩니다.
 
 ### 4. 🧠 장기 기억 및 패턴 분석 (Long-term Memory)
-- **주간 요약**: 매일 새벽 스케줄러가 사용자의 최근 7일 기록을 분석합니다.
+- **주간 요약**: 매일 새벽 스케줄러가 사용자의 최근 7일 기록을 분석하여 AI에게 '장기 기억'을 주입합니다.
 - **맥락 유지**: 단순한 일회성 피드백을 넘어, 사용자의 과거 기록을 바탕으로 변화된 감정 패턴을 인식하고 조언합니다.
+
+---
+
+## 🧠 AI Prompt Engineering
+
+단순한 API 호출을 넘어, 페르소나의 일관성을 유지하기 위해 정교한 프롬프트를 설계했습니다.
+
+- **Role-Playing**: 각 페르소나(미르, 해리, 오든)의 말투, 어조, 강조하는 가치를 시스템 프롬프트에 명시했습니다.
+- **Context Injection**: 사용자의 **최근 3일간의 기록(단기 기억)**과 **주간 요약(장기 기억)**을 프롬프트에 동적으로 주입하여, AI가 사용자의 맥락을 이해하고 답변하도록 구현했습니다.
+- **Structured Output**: JSON 형식을 강제하여 프론트엔드에서 파싱하기 쉬운 구조화된 데이터(멘트, 미니 플랜)를 받습니다.
 
 ---
 
@@ -66,6 +78,16 @@ LLM(Large Language Model)을 활용해 사용자의 감정을 분석하고, 즉�
     - `Dio` 클라이언트의 `connectTimeout`, `receiveTimeout`을 늘려 불안정한 네트워크 환경에서도 요청이 실패하지 않도록 안정성을 확보했습니다.
 - **배운 점**: 개발 환경(Debug)과 배포 환경(Release)의 차이를 이해하고, OS별 보안 정책을 미리 검토하는 것의 중요성을 배웠습니다.
 
+### 3. Flutter 위젯 생명주기(Lifecycle) 오류 해결
+- **문제**: 로그아웃 시 `setState() called after dispose()` 오류가 발생하며 앱이 비정상 종료되는 현상이 있었습니다. 비동기 작업 후 화면이 이미 사라진 상태에서 UI를 업데이트하려 했기 때문입니다.
+- **해결**:
+  - `AuthProvider`와 UI 로직을 분리하여, 로그아웃 시 **화면 전환(Navigation)을 먼저 수행**하고, 이후에 데이터 초기화를 진행하도록 순서를 변경했습니다.
+  - `mounted` 속성을 확인하는 방어 코드를 추가하여 안정성을 확보했습니다.
+
+### 4. 회원가입 UX 개선
+- **문제**: 회원가입 후 다시 로그인을 해야 하는 번거로운 절차가 있었습니다.
+- **해결**: 회원가입 API 호출 성공 시, 내부적으로 로그인 로직을 연이어 실행하도록 `AuthProvider`를 개선하여, 사용자가 가입 즉시 서비스에 진입할 수 있도록 UX를 개선했습니다.
+
 ---
 
 ## 🛠 Tech Stack
@@ -73,20 +95,21 @@ LLM(Large Language Model)을 활용해 사용자의 감정을 분석하고, 즉�
 ### Backend
 - **Language**: Java 17
 - **Framework**: Spring Boot 3.x
-- **Database**: MySQL (JPA/Hibernate)
-- **Security**: Spring Security, JWT (Access Token)
+- **Database**: PostgreSQL (JPA/Hibernate)
+- **Security**: Spring Security, JWT (Access Token), BCrypt
 - **AI**: Google Gemini Pro API
 - **Scheduler**: ShedLock (분산 환경 스케줄링 고려)
 
 ### Frontend
 - **Framework**: Flutter
 - **State Management**: Provider
-- **Network**: Dio (with Interceptors)
+- **Network**: Dio (with Interceptors for Auth)
 - **UI**: Material Design 3
 
 ### Infrastructure
 - **Deployment**: Railway (Docker)
 - **Store**: ONE Store (Android)
+- **CI/CD**: GitHub Actions (예정)
 
 ---
 
@@ -116,8 +139,8 @@ justaday/
 │
 └── frontend/           # Flutter App
     ├── lib/
-    │   ├── ui/         # Screens (Journal, Auth, Persona)
-    │   ├── state/      # Providers (JournalProvider)
+    │   ├── ui/         # Screens (Journal, Auth, Persona, Settings)
+    │   ├── state/      # Providers (JournalProvider, AuthProvider)
     │   ├── data/       # API Clients & Models
     │   └── main.dart
     └── pubspec.yaml
@@ -131,6 +154,7 @@ justaday/
 | :--- | :--- | :--- |
 | `POST` | `/api/v1/auth/signup` | 회원가입 |
 | `POST` | `/api/v1/auth/login` | 로그인 (JWT 발급) |
+| `DELETE`| `/api/v1/user` | 회원 탈퇴 (관련 데이터 일괄 삭제) |
 | `POST` | `/api/v1/log` | 저널 제출 (AI 분석 시작) |
 | `GET` | `/api/v1/log/latest` | 오늘의 저널 및 피드백 조회 (Polling용) |
 | `GET` | `/api/v1/log/getall` | 전체 기록 조회 |
